@@ -1,16 +1,11 @@
 import { configureStore, Action, ThunkAction } from '@reduxjs/toolkit'
 
-import { apiSlice } from '@/features/api/apiSlice'
 import postsReducer from '@/features/posts/postsSlice'
-import { listenerMiddleware } from './listenerMiddleware'
 
 export const store = configureStore({
   reducer: {
     posts: postsReducer,
-    [apiSlice.reducerPath]: apiSlice.reducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().prepend(listenerMiddleware.middleware).concat(apiSlice.middleware),
 })
 
 // Infer the type of `store`

@@ -1,7 +1,6 @@
 import type { RootState } from '@/app/store'
 import { createSlice, PayloadAction, createSelector, createEntityAdapter, EntityState } from '@reduxjs/toolkit'
 
-import { apiSlice } from '@/features/api/apiSlice'
 import { createAppAsyncThunk } from '@/app/withTypes'
 import { AppStartListening } from '@/app/listenerMiddleware'
 import { fetchPostsApi } from '@/app/apis'
@@ -12,6 +11,7 @@ export interface Post {
   title: string
   body: string
   userId: string
+  date: string
 }
 
 export type NewPost = Pick<Post, 'title' | 'body' | 'userId'>
@@ -21,7 +21,6 @@ interface PostsState extends EntityState<Post, string> {
   error: string | null
 }
 
-// TODO: add date field to sort
 const postsAdapter = createEntityAdapter<Post>({
   // Sort in descending date order
   // sortComparer: (a, b) => b.date.localeCompare(a.date),
@@ -35,8 +34,8 @@ const initialState: PostsState = postsAdapter.getInitialState({
 export const fetchPosts = createAppAsyncThunk(
   'posts/fetchPosts',
   async () => {
-    const response = await fetchPostsApi()
-    return response
+    const data = await fetchPostsApi()
+    return data.map((post) => ({ ...post, date: new Date().toISOString() }))
   },
   {
     condition(arg, thunkApi) {
@@ -56,7 +55,7 @@ const postsSlice = createSlice({
     postAdded(state, action: PayloadAction<Post>) {
       // "Mutate" the existing state array, which is
       // safe to do here because `createSlice` uses Immer inside.
-      postsAdapter.addOne(state, action)
+      postsAdapter.addOne(state, { ...action.payload, date: new Date().toISOString() })
     },
   },
   extraReducers: (builder) => {
@@ -111,7 +110,7 @@ export const selectPostsError = (state: RootState) => state.posts.error
 
 export const addPostsListeners = (startAppListening: AppStartListening) => {
   startAppListening({
-    matcher: apiSlice.endpoints.addNewPost.matchFulfilled,
+    type: 'posts/postAdded',
     effect: async (action, listenerApi) => {
       const { toast } = await import('react-tiny-toast')
 

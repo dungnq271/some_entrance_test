@@ -2,8 +2,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
 
-// import App from './App'
-import { PostsMainPage } from './features/posts/PostsMainPage'
+import App from './App'
 
 import { store } from './app/store'
 import './primitiveui.css'
@@ -16,7 +15,7 @@ async function start() {
   root.render(
     <React.StrictMode>
       <Provider store={store}>
-        <PostsMainPage />
+        <App />
       </Provider>
     </React.StrictMode>,
   )

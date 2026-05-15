@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react'
-import { useGetPostsQuery, Post } from '@/features/api/apiSlice'
 import { useAppSelector, useAppDispatch } from '@/app/hooks'
-import { fetchPosts, selectAllPosts, selectPostsStatus } from './postsSlice'
-import classnames from 'classnames'
+import { Post, fetchPosts, selectAllPosts, selectPostsStatus, selectPostsError } from './postsSlice'
 
 import { PostAuthor } from './PostAuthor'
 import { Spinner } from '@/components/Spinner'
+import { TimeAgo } from '@/components/TimeAgo'
 
 interface PostExcerptProps {
   post: Post
@@ -16,17 +15,18 @@ let PostExcerpt = ({ post }: PostExcerptProps) => {
     <article className="post-excerpt" key={post.id}>
       <div>
         <PostAuthor userId={post.userId} />
+        <TimeAgo timestamp={post.date} />
       </div>
       <p className="post-content">{post.body}</p>
     </article>
   )
 }
 
-// TODO: add fetching state with spinner
 export const PostsList = () => {
   const dispatch = useAppDispatch()
   const posts = useAppSelector(selectAllPosts)
   const postStatus = useAppSelector(selectPostsStatus)
+  const postsError = useAppSelector(selectPostsError)
 
   useEffect(() => {
     if (postStatus === 'idle') {
@@ -36,13 +36,20 @@ export const PostsList = () => {
 
   let content: React.ReactNode
 
-  const renderedPosts = posts.map((post) => <PostExcerpt key={post.id} post={post} />)
-  content = <div className="posts-container">{renderedPosts}</div>
+  if (postStatus === 'pending') {
+    content = <Spinner text="Loading..." />
+  } else if (postStatus === 'succeeded') {
+    // Sort posts in reverse chronological order by datetime string
+    const orderedPosts = posts.slice().sort((a, b) => b.date.localeCompare(a.date))
+
+    content = orderedPosts.map((post) => <PostExcerpt key={post.id} post={post} />)
+  } else if (postStatus === 'rejected') {
+    content = <div>{postsError}</div>
+  }
 
   return (
     <section className="posts-list">
       <h2>Posts</h2>
-      <button>Refetch Posts</button>
       {content}
     </section>
   )
