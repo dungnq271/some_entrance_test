@@ -33,6 +33,7 @@ export const PostForm = () => {
       title,
       body,
       userId,
+      date: new Date().toISOString(),
     }
     dispatch(postAdded(newPost))
 

@@ -23,7 +23,7 @@ interface PostsState extends EntityState<Post, string> {
 
 const postsAdapter = createEntityAdapter<Post>({
   // Sort in descending date order
-  // sortComparer: (a, b) => b.date.localeCompare(a.date),
+  sortComparer: (a, b) => b.date.localeCompare(a.date),
 })
 
 const initialState: PostsState = postsAdapter.getInitialState({
@@ -108,9 +108,10 @@ export const selectPostsByUser = createSelector(
 export const selectPostsStatus = (state: RootState) => state.posts.status
 export const selectPostsError = (state: RootState) => state.posts.error
 
+// TODO: fix toast not shown
 export const addPostsListeners = (startAppListening: AppStartListening) => {
   startAppListening({
-    type: 'posts/postAdded',
+    actionCreator: postAdded,
     effect: async (action, listenerApi) => {
       const { toast } = await import('react-tiny-toast')
 

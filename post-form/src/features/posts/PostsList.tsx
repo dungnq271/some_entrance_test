@@ -13,6 +13,9 @@ interface PostExcerptProps {
 let PostExcerpt = ({ post }: PostExcerptProps) => {
   return (
     <article className="post-excerpt" key={post.id}>
+      <h3>
+        <a href="">{post.title}</a>
+      </h3>
       <div>
         <PostAuthor userId={post.userId} />
         <TimeAgo timestamp={post.date} />
